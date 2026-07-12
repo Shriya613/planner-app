@@ -8,6 +8,8 @@ function CategoryDetail() {
   const navigate = useNavigate()
   const categoryId = Number(id)
 
+  // Live queries only see writes made through this Dexie instance (e.g. db.items.add/.update) —
+  // writes via the raw IndexedDB API won't trigger a re-render here.
   const category = useLiveQuery(() => db.categories.get(categoryId), [categoryId])
   const items = useLiveQuery(
     () => db.items.where('categoryId').equals(categoryId).toArray(),
