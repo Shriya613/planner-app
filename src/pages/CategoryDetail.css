@@ -1,0 +1,15 @@
+.done-text {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.journal-page {
+  background-image: repeating-linear-gradient(to bottom, transparent, transparent 31px, #d8d3c8 32px);
+  line-height: 32px;
+}
+
+.journal-entry {
+  margin: 0;
+  border-bottom: 1px dotted #b5aca0;
+  padding: 0 4px;
+}
