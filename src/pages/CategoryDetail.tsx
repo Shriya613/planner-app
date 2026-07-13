@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import db from '../db'
@@ -16,8 +17,26 @@ function CategoryDetail() {
     [categoryId],
   )
 
+  const [isAdding, setIsAdding] = useState(false)
+  const [content, setContent] = useState('')
+
   async function toggleDone(itemId: number, done: boolean) {
     await db.items.update(itemId, { done: !done })
+  }
+
+  async function handleAddItem() {
+    const trimmed = content.trim()
+    if (!trimmed) return
+
+    await db.items.add({
+      categoryId,
+      content: trimmed,
+      done: false,
+      createdAt: Date.now(),
+    })
+
+    setContent('')
+    setIsAdding(false)
   }
 
   if (category === undefined || items === undefined) {
@@ -82,6 +101,27 @@ function CategoryDetail() {
             </p>
           ))}
         </div>
+      )}
+
+      {isAdding ? (
+        <div className="add-item-sheet">
+          <input
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Add an item"
+            autoFocus
+          />
+          <button type="button" onClick={handleAddItem}>
+            Save
+          </button>
+          <button type="button" onClick={() => setIsAdding(false)}>
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <button type="button" className="add-item-button" onClick={() => setIsAdding(true)}>
+          +
+        </button>
       )}
     </div>
   )
