@@ -1,15 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import db, { type CategoryType } from '../db'
+import db, { CATEGORY_TYPE_ICONS, type CategoryType } from '../db'
+import './Home.css'
 
 const AFFIRMATION = "You're doing better than you think."
-
-const TYPE_ICONS: Record<CategoryType, string> = {
-  checklist: '☑️',
-  notes: '📝',
-  journal: '📔',
-}
 
 function Home() {
   const navigate = useNavigate()
@@ -31,22 +26,28 @@ function Home() {
   }
 
   return (
-    <div>
-      <div>{AFFIRMATION}</div>
+    <div className="home-page">
+      <div className="affirmation-banner">{AFFIRMATION}</div>
 
-      <ul>
+      <ul className="category-list">
         {categories?.map((category) => (
           <li key={category.id}>
-            <button type="button" onClick={() => navigate(`/category/${category.id}`)}>
-              <span>{TYPE_ICONS[category.type]}</span> <span>{category.name}</span>
+            <button
+              type="button"
+              className={`category-card category-card--${category.type}`}
+              onClick={() => navigate(`/category/${category.id}`)}
+            >
+              <span className="category-card-icon">{CATEGORY_TYPE_ICONS[category.type]}</span>
+              <span className="category-card-name">{category.name}</span>
             </button>
           </li>
         ))}
 
         <li>
           {isAdding ? (
-            <div>
+            <div className="add-category-form">
               <input
+                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => {
@@ -61,15 +62,25 @@ function Home() {
                 <option value="notes">Notes</option>
                 <option value="journal">Journal</option>
               </select>
-              <button type="button" onClick={handleSave}>
-                Save
-              </button>
-              <button type="button" onClick={() => setIsAdding(false)}>
-                Cancel
-              </button>
+              <div className="add-category-form-actions">
+                <button type="button" onClick={handleSave}>
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => setIsAdding(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : (
-            <button type="button" onClick={() => setIsAdding(true)}>
+            <button
+              type="button"
+              className="add-category-button"
+              onClick={() => setIsAdding(true)}
+            >
               + Add category (custom)
             </button>
           )}

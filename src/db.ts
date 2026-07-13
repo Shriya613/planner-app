@@ -2,6 +2,12 @@ import Dexie, { type EntityTable } from 'dexie'
 
 export type CategoryType = 'checklist' | 'notes' | 'journal'
 
+export const CATEGORY_TYPE_ICONS: Record<CategoryType, string> = {
+  checklist: '✅',
+  notes: '🍋',
+  journal: '🌸',
+}
+
 export interface Category {
   id: number
   name: string

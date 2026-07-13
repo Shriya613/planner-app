@@ -1,0 +1,85 @@
+.home-page {
+  padding: 24px 0 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.affirmation-banner {
+  background: var(--color-peach);
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: 18px;
+  text-align: center;
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.category-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: left;
+}
+
+/* checklist = warm/action, notes + journal = calm/reflective writing spaces */
+.category-card--checklist {
+  background: var(--color-peach);
+}
+
+.category-card--notes,
+.category-card--journal {
+  background: var(--color-sky);
+}
+
+.category-card-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.category-card-name {
+  flex: 1;
+}
+
+.add-category-button {
+  width: 100%;
+  background: transparent;
+  border: 2px dashed var(--color-orange);
+  color: var(--color-orange);
+  box-shadow: none;
+}
+
+.add-category-button:hover {
+  background: rgba(244, 162, 97, 0.08);
+  box-shadow: none;
+}
+
+.add-category-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--color-white);
+  box-shadow: var(--shadow-soft);
+}
+
+.add-category-form-actions {
+  display: flex;
+  gap: 8px;
+}

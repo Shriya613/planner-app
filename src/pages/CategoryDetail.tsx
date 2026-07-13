@@ -1,8 +1,21 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
-import db from '../db'
+import db, { CATEGORY_TYPE_ICONS } from '../db'
 import './CategoryDetail.css'
+
+// Fixed points around a circle, so each confetti piece flies a different direction —
+// no randomness needed, which keeps the animation deterministic and cheap to render.
+const CONFETTI_PIECES = [
+  { dx: 40, dy: 0, icon: '❤️' },
+  { dx: 28, dy: -28, icon: '✨' },
+  { dx: 0, dy: -40, icon: '🎉' },
+  { dx: -28, dy: -28, icon: '❤️' },
+  { dx: -40, dy: 0, icon: '✨' },
+  { dx: -28, dy: 28, icon: '🎉' },
+  { dx: 0, dy: 40, icon: '❤️' },
+  { dx: 28, dy: 28, icon: '✨' },
+]
 
 function CategoryDetail() {
   const { id } = useParams()
@@ -27,8 +40,18 @@ function CategoryDetail() {
   const [renameValue, setRenameValue] = useState('')
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
 
+  const [burstItemId, setBurstItemId] = useState<number | null>(null)
+
   async function toggleDone(itemId: number, done: boolean) {
-    await db.items.update(itemId, { done: !done })
+    const nowDone = !done
+    await db.items.update(itemId, { done: nowDone })
+
+    if (nowDone) {
+      setBurstItemId(itemId)
+      window.setTimeout(() => {
+        setBurstItemId((current) => (current === itemId ? null : current))
+      }, 700)
+    }
   }
 
   async function deleteItem(itemId: number) {
@@ -100,13 +123,13 @@ function CategoryDetail() {
   }
 
   if (category === undefined || items === undefined) {
-    return <div>Loading…</div>
+    return <div className="page">Loading…</div>
   }
 
   if (!category) {
     return (
-      <div>
-        <button type="button" onClick={() => navigate('/home')}>
+      <div className="page">
+        <button type="button" className="button-secondary" onClick={() => navigate('/home')}>
           ← Back
         </button>
         <p>Category not found.</p>
@@ -117,14 +140,19 @@ function CategoryDetail() {
   const doneCount = items.filter((item) => item.done).length
 
   return (
-    <div>
-      <button type="button" onClick={() => navigate('/home')}>
+    <div className="page">
+      <button
+        type="button"
+        className="button-secondary back-button"
+        onClick={() => navigate('/home')}
+      >
         ← Back
       </button>
 
       {isRenaming ? (
         <div className="rename-form">
           <input
+            type="text"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
             onKeyDown={(e) => {
@@ -136,12 +164,15 @@ function CategoryDetail() {
           <button type="button" onClick={saveRename}>
             Save
           </button>
-          <button type="button" onClick={cancelRename}>
+          <button type="button" className="button-secondary" onClick={cancelRename}>
             Cancel
           </button>
         </div>
       ) : (
         <div className="category-header">
+          <span className={`category-type-icon category-type-icon--${category.type}`}>
+            {CATEGORY_TYPE_ICONS[category.type]}
+          </span>
           <h1>{category.name}</h1>
           <button
             type="button"
@@ -168,22 +199,28 @@ function CategoryDetail() {
             Delete "{category.name}" and all {items.length} item{items.length === 1 ? '' : 's'} in
             it? This can't be undone.
           </p>
-          <button type="button" onClick={handleDeleteCategory}>
-            Delete
-          </button>
-          <button type="button" onClick={() => setIsConfirmingDelete(false)}>
-            Cancel
-          </button>
+          <div className="delete-confirm-actions">
+            <button type="button" className="button-danger" onClick={handleDeleteCategory}>
+              Delete
+            </button>
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => setIsConfirmingDelete(false)}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
-      {items.length === 0 && <p>Nothing here yet.</p>}
+      {items.length === 0 && <p className="empty-state">Nothing here yet.</p>}
 
       {category.type === 'checklist' && items.length > 0 && (
         <>
-          <ul>
+          <ul className="checklist">
             {items.map((item) => (
-              <li key={item.id}>
+              <li key={item.id} className="checklist-item">
                 <label>
                   <input
                     type="checkbox"
@@ -192,6 +229,21 @@ function CategoryDetail() {
                   />
                   <span className={item.done ? 'done-text' : undefined}>{item.content}</span>
                 </label>
+                {burstItemId === item.id && (
+                  <span className="confetti-burst" aria-hidden="true">
+                    {CONFETTI_PIECES.map((piece, index) => (
+                      <span
+                        key={index}
+                        className="confetti-piece"
+                        style={
+                          { '--dx': `${piece.dx}px`, '--dy': `${piece.dy}px` } as CSSProperties
+                        }
+                      >
+                        {piece.icon}
+                      </span>
+                    ))}
+                  </span>
+                )}
                 <button
                   type="button"
                   className="delete-item-button"
@@ -203,16 +255,17 @@ function CategoryDetail() {
               </li>
             ))}
           </ul>
-          <p>Done: {doneCount}</p>
+          <p className="done-count">Done: {doneCount}</p>
         </>
       )}
 
       {category.type === 'notes' && items.length > 0 && (
-        <ul>
+        <ul className="notes-list">
           {items.map((item) => (
             <li key={item.id}>
               {editingItemId === item.id ? (
                 <input
+                  type="text"
                   value={editingContent}
                   onChange={(e) => setEditingContent(e.target.value)}
                   onBlur={saveEdit}
@@ -244,6 +297,7 @@ function CategoryDetail() {
             <p key={item.id} className="journal-entry">
               {editingItemId === item.id ? (
                 <input
+                  type="text"
                   value={editingContent}
                   onChange={(e) => setEditingContent(e.target.value)}
                   onBlur={saveEdit}
@@ -272,6 +326,7 @@ function CategoryDetail() {
       {isAdding ? (
         <div className="add-item-sheet">
           <input
+            type="text"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={(e) => {
@@ -284,7 +339,7 @@ function CategoryDetail() {
           <button type="button" onClick={handleAddItem}>
             Save
           </button>
-          <button type="button" onClick={() => setIsAdding(false)}>
+          <button type="button" className="button-secondary" onClick={() => setIsAdding(false)}>
             Cancel
           </button>
         </div>

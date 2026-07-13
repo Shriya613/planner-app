@@ -1,28 +1,194 @@
-.done-text {
-  text-decoration: line-through;
-  opacity: 0.6;
+.page {
+  padding: 24px 0 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
+.back-button {
+  align-self: flex-start;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.category-header h1 {
+  margin: 0;
+  flex: 1;
+}
+
+.category-type-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.category-type-icon--checklist {
+  background: var(--color-peach);
+}
+
+.category-type-icon--notes,
+.category-type-icon--journal {
+  background: var(--color-sky);
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  box-shadow: none;
+}
+
+.icon-button:hover {
+  transform: none;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.rename-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.delete-confirm {
+  background: var(--color-white);
+  border: 2px solid var(--color-peach);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Checklist */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checklist-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--color-white);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+.checklist-item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.done-text {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.done-count {
+  align-self: flex-start;
+  background: var(--color-peach);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+/* Notes */
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notes-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--color-white);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Journal */
 .journal-page {
-  background-image: repeating-linear-gradient(to bottom, transparent, transparent 31px, #d8d3c8 32px);
+  background: var(--color-white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  padding: 4px 20px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 31px,
+    rgba(74, 52, 40, 0.15) 32px
+  );
   line-height: 32px;
 }
 
 .journal-entry {
   margin: 0;
-  border-bottom: 1px dotted #b5aca0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px dotted rgba(74, 52, 40, 0.25);
   padding: 0 4px;
 }
 
+.editable-text {
+  cursor: text;
+}
+
+.delete-item-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: none;
+  font-size: 15px;
+  opacity: 0.6;
+}
+
+.delete-item-button:hover {
+  opacity: 1;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Add item */
 .add-item-button {
   position: fixed;
-  right: 24px;
+  right: max(24px, calc(50vw - 320px + 24px));
   bottom: 24px;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  font-size: 24px;
+  font-size: 28px;
   line-height: 1;
+  box-shadow: var(--shadow-soft);
 }
 
 .add-item-sheet {
@@ -33,51 +199,42 @@
   display: flex;
   gap: 8px;
   padding: 16px;
-  background: var(--bg, #fff);
-  border-top: 1px solid var(--border, #e5e4e7);
+  background: var(--color-white);
+  border-top: 2px solid var(--color-peach);
+  max-width: 640px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .add-item-sheet input {
   flex: 1;
 }
 
-.delete-item-button {
-  margin-left: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
+/* Confetti burst, fired when a checklist item is checked off */
+.confetti-burst {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
 
-.editable-text {
-  cursor: text;
+.confetti-piece {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 14px;
+  animation: confetti-burst 0.7s ease-out forwards;
 }
 
-.category-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.category-header h1 {
-  margin: 0;
-}
-
-.icon-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.rename-form {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.delete-confirm {
-  border: 1px solid var(--border, #e5e4e7);
-  border-radius: 8px;
-  padding: 12px;
-  margin: 12px 0;
+@keyframes confetti-burst {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.4);
+    opacity: 0;
+  }
 }
