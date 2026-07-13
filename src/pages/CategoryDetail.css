@@ -40,3 +40,14 @@
 .add-item-sheet input {
   flex: 1;
 }
+
+.delete-item-button {
+  margin-left: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.editable-text {
+  cursor: text;
+}

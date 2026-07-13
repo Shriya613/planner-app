@@ -20,8 +20,15 @@ function CategoryDetail() {
   const [isAdding, setIsAdding] = useState(false)
   const [content, setContent] = useState('')
 
+  const [editingItemId, setEditingItemId] = useState<number | null>(null)
+  const [editingContent, setEditingContent] = useState('')
+
   async function toggleDone(itemId: number, done: boolean) {
     await db.items.update(itemId, { done: !done })
+  }
+
+  async function deleteItem(itemId: number) {
+    await db.items.delete(itemId)
   }
 
   async function handleAddItem() {
@@ -37,6 +44,28 @@ function CategoryDetail() {
 
     setContent('')
     setIsAdding(false)
+  }
+
+  function startEditing(itemId: number, currentContent: string) {
+    setEditingItemId(itemId)
+    setEditingContent(currentContent)
+  }
+
+  async function saveEdit() {
+    if (editingItemId === null) return
+
+    const trimmed = editingContent.trim()
+    if (trimmed) {
+      await db.items.update(editingItemId, { content: trimmed })
+    }
+
+    setEditingItemId(null)
+    setEditingContent('')
+  }
+
+  function cancelEdit() {
+    setEditingItemId(null)
+    setEditingContent('')
   }
 
   if (category === undefined || items === undefined) {
@@ -78,6 +107,14 @@ function CategoryDetail() {
                   />
                   <span className={item.done ? 'done-text' : undefined}>{item.content}</span>
                 </label>
+                <button
+                  type="button"
+                  className="delete-item-button"
+                  onClick={() => deleteItem(item.id)}
+                  aria-label="Delete item"
+                >
+                  🗑
+                </button>
               </li>
             ))}
           </ul>
@@ -88,7 +125,30 @@ function CategoryDetail() {
       {category.type === 'notes' && items.length > 0 && (
         <ul>
           {items.map((item) => (
-            <li key={item.id}>{item.content}</li>
+            <li key={item.id}>
+              {editingItemId === item.id ? (
+                <input
+                  value={editingContent}
+                  onChange={(e) => setEditingContent(e.target.value)}
+                  onBlur={saveEdit}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveEdit()
+                    if (e.key === 'Escape') cancelEdit()
+                  }}
+                  autoFocus
+                />
+              ) : (
+                <span className="editable-text" onClick={() => startEditing(item.id, item.content)}>{item.content}</span>
+              )}
+              <button
+                type="button"
+                className="delete-item-button"
+                onClick={() => deleteItem(item.id)}
+                aria-label="Delete item"
+              >
+                🗑
+              </button>
+            </li>
           ))}
         </ul>
       )}
@@ -97,7 +157,28 @@ function CategoryDetail() {
         <div className="journal-page">
           {items.map((item) => (
             <p key={item.id} className="journal-entry">
-              {item.content}
+              {editingItemId === item.id ? (
+                <input
+                  value={editingContent}
+                  onChange={(e) => setEditingContent(e.target.value)}
+                  onBlur={saveEdit}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') saveEdit()
+                    if (e.key === 'Escape') cancelEdit()
+                  }}
+                  autoFocus
+                />
+              ) : (
+                <span className="editable-text" onClick={() => startEditing(item.id, item.content)}>{item.content}</span>
+              )}
+              <button
+                type="button"
+                className="delete-item-button"
+                onClick={() => deleteItem(item.id)}
+                aria-label="Delete item"
+              >
+                🗑
+              </button>
             </p>
           ))}
         </div>
