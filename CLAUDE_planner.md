@@ -83,3 +83,12 @@ Do not introduce localStorage/sessionStorage — IndexedDB is the correct choice
 ## Working notes for future sessions
 - The user has no prior Figma/design tool experience — prefer describing UI changes in plain terms or building quick prototypes over expecting Figma file edits.
 - Prototyping/iteration on flow and layout has been happening in Claude.ai chat (clickable HTML mockups). Once a layout is agreed there, port it into this project as real React components — don't assume the chat prototypes are reusable code as-is.
+
+## Progress so far
+- Vite + React + TypeScript scaffold is set up, with Dexie installed for IndexedDB storage.
+- Routing is wired with React Router: `/` → Landing, `/home` → Home, `/category/:id` → Category detail.
+- Dexie schema is built (`categories` and `items` tables) and seeded on first load with the 4 starter categories (To-do/checklist, Quick ideas/notes, Quotes/notes, TBR list/journal).
+- Home screen renders the category list live via `useLiveQuery`, with a working add-category flow (name input + type picker) that writes straight to Dexie.
+- Category detail renders all three type-specific layouts (checklist with checkable items and a done counter, notes as free text, journal with a dotted/ruled-page look), each with an empty state.
+- All of the above is committed and pushed to GitHub.
+- **Not yet built**: the "add item" flow (text/voice/photo input) — this is the next planned step.
