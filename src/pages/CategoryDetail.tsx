@@ -274,6 +274,10 @@ function CategoryDetail() {
           <input
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAddItem()
+              if (e.key === 'Escape') setIsAdding(false)
+            }}
             placeholder="Add an item"
             autoFocus
           />
