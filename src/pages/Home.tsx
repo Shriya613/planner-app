@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { AnimatePresence, motion } from 'framer-motion'
 import db, { CATEGORY_TYPE_ICONS, type CategoryType } from '../db'
+import { listItemTransition, listItemVariants, pageTransition, pageVariants } from '../motion'
 import './Home.css'
 
 const AFFIRMATION = "You're doing better than you think."
@@ -26,22 +28,39 @@ function Home() {
   }
 
   return (
-    <div className="home-page">
+    <motion.div
+      className="home-page"
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <div className="affirmation-banner">{AFFIRMATION}</div>
 
       <ul className="category-list">
-        {categories?.map((category) => (
-          <li key={category.id}>
-            <button
-              type="button"
-              className={`category-card category-card--${category.type}`}
-              onClick={() => navigate(`/category/${category.id}`)}
+        <AnimatePresence initial={false}>
+          {categories?.map((category) => (
+            <motion.li
+              key={category.id}
+              layout
+              variants={listItemVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={listItemTransition}
             >
-              <span className="category-card-icon">{CATEGORY_TYPE_ICONS[category.type]}</span>
-              <span className="category-card-name">{category.name}</span>
-            </button>
-          </li>
-        ))}
+              <button
+                type="button"
+                className={`category-card category-card--${category.type}`}
+                onClick={() => navigate(`/category/${category.id}`)}
+              >
+                <span className="category-card-icon">{CATEGORY_TYPE_ICONS[category.type]}</span>
+                <span className="category-card-name">{category.name}</span>
+              </button>
+            </motion.li>
+          ))}
+        </AnimatePresence>
 
         <li>
           {isAdding ? (
@@ -86,7 +105,7 @@ function Home() {
           )}
         </li>
       </ul>
-    </div>
+    </motion.div>
   )
 }
 

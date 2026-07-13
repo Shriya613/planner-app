@@ -1,7 +1,9 @@
 import { useState, type CSSProperties } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { AnimatePresence, motion } from 'framer-motion'
 import db, { CATEGORY_TYPE_ICONS } from '../db'
+import { listItemTransition, listItemVariants, pageTransition, pageVariants } from '../motion'
 import './CategoryDetail.css'
 
 // Fixed points around a circle, so each confetti piece flies a different direction —
@@ -123,24 +125,49 @@ function CategoryDetail() {
   }
 
   if (category === undefined || items === undefined) {
-    return <div className="page">Loading…</div>
+    return (
+      <motion.div
+        className="page"
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
+        Loading…
+      </motion.div>
+    )
   }
 
   if (!category) {
     return (
-      <div className="page">
+      <motion.div
+        className="page"
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         <button type="button" className="button-secondary" onClick={() => navigate('/home')}>
           ← Back
         </button>
         <p>Category not found.</p>
-      </div>
+      </motion.div>
     )
   }
 
   const doneCount = items.filter((item) => item.done).length
 
   return (
-    <div className="page">
+    <motion.div
+      className="page"
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
       <button
         type="button"
         className="button-secondary back-button"
@@ -219,29 +246,95 @@ function CategoryDetail() {
       {category.type === 'checklist' && items.length > 0 && (
         <>
           <ul className="checklist">
+            <AnimatePresence initial={false}>
+              {items.map((item) => (
+                <motion.li
+                  key={item.id}
+                  layout
+                  className="checklist-item"
+                  variants={listItemVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={listItemTransition}
+                >
+                  <label>
+                    <motion.span
+                      className="checkbox-bounce"
+                      initial={false}
+                      animate={{ scale: item.done ? [1, 1.3, 1] : [1, 0.85, 1] }}
+                      transition={{ duration: 0.35, ease: 'easeOut' }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={item.done}
+                        onChange={() => toggleDone(item.id, item.done)}
+                      />
+                    </motion.span>
+                    <span className={item.done ? 'done-text' : undefined}>{item.content}</span>
+                  </label>
+                  {burstItemId === item.id && (
+                    <span className="confetti-burst" aria-hidden="true">
+                      {CONFETTI_PIECES.map((piece, index) => (
+                        <span
+                          key={index}
+                          className="confetti-piece"
+                          style={
+                            { '--dx': `${piece.dx}px`, '--dy': `${piece.dy}px` } as CSSProperties
+                          }
+                        >
+                          {piece.icon}
+                        </span>
+                      ))}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="delete-item-button"
+                    onClick={() => deleteItem(item.id)}
+                    aria-label="Delete item"
+                  >
+                    🗑
+                  </button>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </ul>
+          <p className="done-count">Done: {doneCount}</p>
+        </>
+      )}
+
+      {category.type === 'notes' && items.length > 0 && (
+        <ul className="notes-list">
+          <AnimatePresence initial={false}>
             {items.map((item) => (
-              <li key={item.id} className="checklist-item">
-                <label>
+              <motion.li
+                key={item.id}
+                layout
+                variants={listItemVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={listItemTransition}
+              >
+                {editingItemId === item.id ? (
                   <input
-                    type="checkbox"
-                    checked={item.done}
-                    onChange={() => toggleDone(item.id, item.done)}
+                    type="text"
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                    onBlur={saveEdit}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveEdit()
+                      if (e.key === 'Escape') cancelEdit()
+                    }}
+                    autoFocus
                   />
-                  <span className={item.done ? 'done-text' : undefined}>{item.content}</span>
-                </label>
-                {burstItemId === item.id && (
-                  <span className="confetti-burst" aria-hidden="true">
-                    {CONFETTI_PIECES.map((piece, index) => (
-                      <span
-                        key={index}
-                        className="confetti-piece"
-                        style={
-                          { '--dx': `${piece.dx}px`, '--dy': `${piece.dy}px` } as CSSProperties
-                        }
-                      >
-                        {piece.icon}
-                      </span>
-                    ))}
+                ) : (
+                  <span
+                    className="editable-text"
+                    onClick={() => startEditing(item.id, item.content)}
+                  >
+                    {item.content}
                   </span>
                 )}
                 <button
@@ -252,74 +345,57 @@ function CategoryDetail() {
                 >
                   🗑
                 </button>
-              </li>
+              </motion.li>
             ))}
-          </ul>
-          <p className="done-count">Done: {doneCount}</p>
-        </>
-      )}
-
-      {category.type === 'notes' && items.length > 0 && (
-        <ul className="notes-list">
-          {items.map((item) => (
-            <li key={item.id}>
-              {editingItemId === item.id ? (
-                <input
-                  type="text"
-                  value={editingContent}
-                  onChange={(e) => setEditingContent(e.target.value)}
-                  onBlur={saveEdit}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') saveEdit()
-                    if (e.key === 'Escape') cancelEdit()
-                  }}
-                  autoFocus
-                />
-              ) : (
-                <span className="editable-text" onClick={() => startEditing(item.id, item.content)}>{item.content}</span>
-              )}
-              <button
-                type="button"
-                className="delete-item-button"
-                onClick={() => deleteItem(item.id)}
-                aria-label="Delete item"
-              >
-                🗑
-              </button>
-            </li>
-          ))}
+          </AnimatePresence>
         </ul>
       )}
 
       {category.type === 'journal' && items.length > 0 && (
         <div className="journal-page">
-          {items.map((item) => (
-            <p key={item.id} className="journal-entry">
-              {editingItemId === item.id ? (
-                <input
-                  type="text"
-                  value={editingContent}
-                  onChange={(e) => setEditingContent(e.target.value)}
-                  onBlur={saveEdit}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') saveEdit()
-                    if (e.key === 'Escape') cancelEdit()
-                  }}
-                  autoFocus
-                />
-              ) : (
-                <span className="editable-text" onClick={() => startEditing(item.id, item.content)}>{item.content}</span>
-              )}
-              <button
-                type="button"
-                className="delete-item-button"
-                onClick={() => deleteItem(item.id)}
-                aria-label="Delete item"
+          <AnimatePresence initial={false}>
+            {items.map((item) => (
+              <motion.p
+                key={item.id}
+                layout
+                className="journal-entry"
+                variants={listItemVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={listItemTransition}
               >
-                🗑
-              </button>
-            </p>
-          ))}
+                {editingItemId === item.id ? (
+                  <input
+                    type="text"
+                    value={editingContent}
+                    onChange={(e) => setEditingContent(e.target.value)}
+                    onBlur={saveEdit}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveEdit()
+                      if (e.key === 'Escape') cancelEdit()
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <span
+                    className="editable-text"
+                    onClick={() => startEditing(item.id, item.content)}
+                  >
+                    {item.content}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="delete-item-button"
+                  onClick={() => deleteItem(item.id)}
+                  aria-label="Delete item"
+                >
+                  🗑
+                </button>
+              </motion.p>
+            ))}
+          </AnimatePresence>
         </div>
       )}
 
@@ -348,7 +424,7 @@ function CategoryDetail() {
           +
         </button>
       )}
-    </div>
+    </motion.div>
   )
 }
 

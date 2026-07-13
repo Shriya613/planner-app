@@ -102,6 +102,11 @@
   gap: 10px;
 }
 
+.checkbox-bounce {
+  display: inline-flex;
+  align-items: center;
+}
+
 .done-text {
   text-decoration: line-through;
   opacity: 0.5;
