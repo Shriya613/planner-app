@@ -23,6 +23,10 @@ function CategoryDetail() {
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
   const [editingContent, setEditingContent] = useState('')
 
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [renameValue, setRenameValue] = useState('')
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
+
   async function toggleDone(itemId: number, done: boolean) {
     await db.items.update(itemId, { done: !done })
   }
@@ -68,6 +72,33 @@ function CategoryDetail() {
     setEditingContent('')
   }
 
+  function startRenaming(currentName: string) {
+    setRenameValue(currentName)
+    setIsRenaming(true)
+  }
+
+  async function saveRename() {
+    const trimmed = renameValue.trim()
+    if (trimmed) {
+      await db.categories.update(categoryId, { name: trimmed })
+    }
+    setIsRenaming(false)
+  }
+
+  function cancelRename() {
+    setIsRenaming(false)
+  }
+
+  async function handleDeleteCategory() {
+    // Delete the category and all of its items together in one transaction, so a failure
+    // partway through can't leave orphaned items behind or a category with no items table entries.
+    await db.transaction('rw', db.categories, db.items, async () => {
+      await db.items.where('categoryId').equals(categoryId).delete()
+      await db.categories.delete(categoryId)
+    })
+    navigate('/home')
+  }
+
   if (category === undefined || items === undefined) {
     return <div>Loading…</div>
   }
@@ -90,7 +121,61 @@ function CategoryDetail() {
       <button type="button" onClick={() => navigate('/home')}>
         ← Back
       </button>
-      <h1>{category.name}</h1>
+
+      {isRenaming ? (
+        <div className="rename-form">
+          <input
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveRename()
+              if (e.key === 'Escape') cancelRename()
+            }}
+            autoFocus
+          />
+          <button type="button" onClick={saveRename}>
+            Save
+          </button>
+          <button type="button" onClick={cancelRename}>
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <div className="category-header">
+          <h1>{category.name}</h1>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => startRenaming(category.name)}
+            aria-label="Rename category"
+          >
+            ✏️
+          </button>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setIsConfirmingDelete(true)}
+            aria-label="Delete category"
+          >
+            🗑
+          </button>
+        </div>
+      )}
+
+      {isConfirmingDelete && (
+        <div className="delete-confirm">
+          <p>
+            Delete "{category.name}" and all {items.length} item{items.length === 1 ? '' : 's'} in
+            it? This can't be undone.
+          </p>
+          <button type="button" onClick={handleDeleteCategory}>
+            Delete
+          </button>
+          <button type="button" onClick={() => setIsConfirmingDelete(false)}>
+            Cancel
+          </button>
+        </div>
+      )}
 
       {items.length === 0 && <p>Nothing here yet.</p>}
 

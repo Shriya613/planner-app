@@ -51,3 +51,33 @@
 .editable-text {
   cursor: text;
 }
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-header h1 {
+  margin: 0;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.rename-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.delete-confirm {
+  border: 1px solid var(--border, #e5e4e7);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+}
